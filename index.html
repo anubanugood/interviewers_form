@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Interview review</title>
+<title>בדיקת ראיון</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -161,14 +161,14 @@
     background: var(--surface-2);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
-    padding: 11px 40px 11px 13px;
+    padding-block: 11px; padding-inline: 13px 40px;
     cursor: pointer;
     transition: border-color .15s, background .15s;
   }
   .select select:hover { border-color: var(--line-strong); }
   .select select:focus { background: var(--surface); border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
   .select::after {
-    content: ""; position: absolute; right: 16px; top: 50%;
+    content: ""; position: absolute; inset-inline-end: 16px; top: 50%;
     width: 8px; height: 8px;
     border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
     transform: translateY(-70%) rotate(45deg);
@@ -189,6 +189,9 @@
   .check:hover { border-color: var(--line-strong); }
   .check:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
   .check input { flex: none; width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
+  .radios { display: flex; gap: 8px; }
+  .radios .check { flex: 1; align-items: center; font-size: 16px; font-weight: 600; }
+  .radios .check input { margin: 0; }
 
   .drop {
     display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
@@ -240,7 +243,7 @@
   .file-open {
     flex: 1; min-width: 0;
     display: flex; align-items: center; gap: 12px;
-    padding: 2px 6px 2px 2px;
+    padding-block: 2px; padding-inline: 2px 6px;
     background: none; border: 0; border-radius: 6px;
     text-align: start; cursor: pointer;
   }
@@ -277,7 +280,7 @@
   .file-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .file-chip {
     display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
-    padding: 5px 12px 5px 5px;
+    padding-block: 5px; padding-inline: 5px 12px;
     border: 1px solid var(--line); border-radius: 10px;
     background: var(--surface-2);
     font-size: 14px; font-weight: 600; text-align: start;
@@ -356,8 +359,8 @@
     border-bottom: 1px solid var(--line);
   }
   .search { position: relative; }
-  .search svg.i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
-  .search input { padding-left: 40px; }
+  .search svg.i { position: absolute; inset-inline-start: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search input { padding-inline-start: 40px; }
   .search input::-webkit-search-cancel-button { cursor: pointer; }
   .status-filter { display: flex; flex-wrap: wrap; gap: 6px; }
   .fchip {
@@ -403,7 +406,7 @@
   }
   dialog.viewer-dialog[open] { display: flex; flex-direction: column; }
   dialog.viewer-dialog::backdrop { background: rgba(8, 18, 15, .6); backdrop-filter: blur(2px); }
-  .dlg-head { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-bottom: 1px solid var(--line); }
+  .dlg-head { display: flex; align-items: center; gap: 12px; padding-block: 12px; padding-inline: 16px 12px; border-bottom: 1px solid var(--line); }
   .dlg-head .meta { flex: 1; min-width: 0; }
   .dlg-head .file-name { font-size: 16px; }
   .dlg-body { flex: 1; overflow: auto; background: var(--surface-2); overscroll-behavior: contain; }
@@ -415,7 +418,7 @@
 </head>
 <body>
 <div class="wrap" id="app">
-  <div class="skeleton"><div class="spinner"></div>Loading the interview details…</div>
+  <div class="skeleton"><div class="spinner"></div>טוען את פרטי הראיון…</div>
 </div>
 
 <dialog class="viewer-dialog" id="viewerDialog" aria-labelledby="dlgTitle">
@@ -425,8 +428,8 @@
       <span class="file-name" id="dlgTitle" dir="auto"></span>
       <span class="file-size" id="dlgSize"></span>
     </div>
-    <a class="icon-btn" id="dlgDownload" href="#" download><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span class="lbl">Download</span></a>
-    <button type="button" class="icon-btn ghost" id="dlgClose" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <a class="icon-btn" id="dlgDownload" href="#" download><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span class="lbl">הורדה</span></a>
+    <button type="button" class="icon-btn ghost" id="dlgClose" aria-label="סגירה"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
   <div class="dlg-body" id="dlgBody"></div>
 </dialog>
@@ -459,6 +462,20 @@
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const dash = (s) => (s && String(s).trim()) ? esc(s) : '—';
+
+  // Hebrew display text for monday labels. The monday values themselves stay as they are, since the
+  // webhook and monday's status columns need the exact labels.
+  const HE = {
+    'Reviewed – no update needed': 'נבדק – אין צורך בעדכון',
+    'Updated by interviewer': 'עודכן על ידי המראיין',
+    'See Notes': 'ראה הערות',
+    'Recommended': 'מומלץ',
+    'Working on it': 'בטיפול',
+    'Done': 'הושלם',
+    'Stuck': 'תקוע',
+    'canceled': 'בוטל',
+  };
+  const he = (s) => HE[s] || s;
 
   function formatSize(bytes) {
     const n = Number(bytes);
@@ -508,7 +525,7 @@
       const s = document.createElement('script');
       s.src = src;
       s.onload = resolve;
-      s.onerror = () => reject(new Error('The document viewer could not be loaded.'));
+      s.onerror = () => reject(new Error('לא ניתן לטעון את מציג המסמכים.'));
       document.head.appendChild(s);
     });
   }
@@ -527,7 +544,7 @@
       const p = fetch(f.url).then(async (r) => {
         if (!r.ok) {
           const err = await r.json().catch(() => ({}));
-          throw new Error(err.error || 'The file could not be loaded.');
+          throw new Error(err.error || 'לא ניתן לטעון את הקובץ.');
         }
         return r.blob();
       });
@@ -557,7 +574,7 @@
 
   function stateHtml(title, text, f) {
     const dl = f && (f.downloadUrl
-      ? `<a class="icon-btn" href="${esc(f.downloadUrl)}" download>${icon('download')}Download</a>`
+      ? `<a class="icon-btn" href="${esc(f.downloadUrl)}" download>${icon('download')}הורדה</a>`
       : '');
     return `<div class="viewer-state">${icon('file')}<h3>${esc(title)}</h3><p>${esc(text)}</p>${dl}</div>`;
   }
@@ -571,15 +588,15 @@
     const kind = kindOf(f);
 
     if (!kind) {
-      container.innerHTML = stateHtml('No preview for this file type', `.${f.ext || 'file'} files can’t be shown in the browser. Download it to open it.`, f);
+      container.innerHTML = stateHtml('אין תצוגה מקדימה לסוג הקובץ הזה', `לא ניתן להציג קובצי ${f.ext ? '.' + f.ext : 'מהסוג הזה'} בדפדפן. יש להוריד את הקובץ כדי לפתוח אותו.`, f);
       return;
     }
     if (!f.file && f.size > MAX_PREVIEW_BYTES && ['docx', 'text', 'pdf'].includes(kind)) {
-      container.innerHTML = stateHtml('This file is too large to preview', `Files over ${formatSize(MAX_PREVIEW_BYTES)} open as a download.`, f);
+      container.innerHTML = stateHtml('הקובץ גדול מדי לתצוגה מקדימה', `קבצים מעל ${formatSize(MAX_PREVIEW_BYTES)} נפתחים כהורדה.`, f);
       return;
     }
 
-    container.innerHTML = `<div class="viewer-state"><div class="spinner"></div>Opening ${esc(f.name)}…</div>`;
+    container.innerHTML = `<div class="viewer-state"><div class="spinner"></div><span>פותח את <bdi>${esc(f.name)}</bdi>…</span></div>`;
     try {
       if (kind === 'docx') {
         const [blob, docx] = await Promise.all([getBlob(f), loadDocx()]);
@@ -603,7 +620,7 @@
         container.innerHTML = `<div class="media-wrap"><${kind} src="${esc(srcFor(f, container))}" controls preload="metadata"></${kind}></div>`;
       }
     } catch (e) {
-      if (!stale()) container.innerHTML = stateHtml('The file could not be shown', e.message, f);
+      if (!stale()) container.innerHTML = stateHtml('לא ניתן להציג את הקובץ', e.message, f);
     }
   }
 
@@ -641,29 +658,29 @@
   }
 
   if (!/^\d+$/.test(itemId)) {
-    showState('This link is missing an item', 'Open the link from monday.com, or add ?itemId= followed by the item number to the address.');
+    showState('בקישור חסר מספר פריט', 'יש לפתוח את הקישור מ־monday.com, או להוסיף לכתובת ?itemId= ואחריו מספר הפריט.');
     return;
   }
 
   fetch('/api/item?itemId=' + encodeURIComponent(itemId))
     .then(async (r) => {
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'The item could not be loaded.');
+      if (!r.ok) throw new Error(data.error || 'לא ניתן לטעון את הפריט.');
       return data;
     })
     .then(render)
-    .catch((e) => showState('The form could not load', e.message));
+    .catch((e) => showState('לא ניתן לטעון את הטופס', e.message));
 
   function selectHtml(id, options, current) {
-    const opts = [`<option value="">Not set</option>`]
-      .concat(options.map((o) => `<option value="${esc(o)}" ${o === current ? 'selected' : ''}>${esc(o)}</option>`));
+    const opts = [`<option value="">לא נבחר</option>`]
+      .concat(options.map((o) => `<option value="${esc(o)}" ${o === current ? 'selected' : ''}>${esc(he(o))}</option>`));
     return `<div class="select"><select id="${id}" dir="auto">${opts.join('')}</select></div>`;
   }
 
   // One file per row; clicking the name or "View" opens it in the viewer dialog.
   const fileRow = (f, detail, actions) => `
     <li class="file-row">
-      <button type="button" class="file-open" data-preview="${esc(f.key)}" title="View ${esc(f.name)}">
+      <button type="button" class="file-open" data-preview="${esc(f.key)}" title="צפייה ב־${esc(f.name)}">
         ${typeBadge(f)}
         <span class="meta"><span class="file-name" dir="auto">${esc(f.name)}</span><span class="file-size">${esc(detail)}</span></span>
       </button>
@@ -671,42 +688,40 @@
     </li>`;
 
   const fileChip = (f) => `
-    <button type="button" class="file-chip" data-preview="${esc(f.key)}" title="Preview ${esc(f.name)}">
+    <button type="button" class="file-chip" data-preview="${esc(f.key)}" title="צפייה ב־${esc(f.name)}">
       ${typeBadge(f, true)}<span class="file-name" dir="auto">${esc(f.name)}</span>
     </button>`;
 
   function taskHtml(t) {
     const pill = t.status
-      ? `<span class="pill" style="background:${esc(t.statusColor || '#8a9692')}">${esc(t.status)}</span>`
-      : `<span class="pill empty">No status</span>`;
+      ? `<span class="pill" style="background:${esc(t.statusColor || '#8a9692')}">${esc(he(t.status))}</span>`
+      : `<span class="pill empty">ללא סטטוס</span>`;
     const taskFiles = (t.files || []).map((x) => track(remoteFile(x)));
     return `<li class="task" data-task="${esc(t.id)}" style="--status:${esc(t.statusColor || 'var(--line-strong)')}">
       <div class="task-head"><h3 dir="auto">${esc(t.name)}</h3>${pill}</div>
       <dl class="meta">
-        <dt>Person in charge</dt><dd dir="auto">${dash(t.personInCharge)}</dd>
-        <dt>Volunteer</dt><dd dir="auto">${dash(t.linkedVolunteer)}</dd>
-        <dt>Date</dt><dd>${dash(t.date)}</dd>
-        <dt>Description</dt><dd dir="auto">${dash(t.description)}</dd>
-        <dt>Comments</dt><dd dir="auto">${dash(t.comments)}</dd>
+        <dt>אחראי</dt><dd dir="auto">${dash(t.personInCharge)}</dd>
+        <dt>מתנדב</dt><dd dir="auto">${dash(t.linkedVolunteer)}</dd>
+        <dt>תאריך</dt><dd dir="ltr" style="text-align:end">${dash(t.date)}</dd>
+        <dt>תיאור</dt><dd dir="auto">${dash(t.description)}</dd>
+        <dt>הערות</dt><dd dir="auto">${dash(t.comments)}</dd>
       </dl>
       ${taskFiles.length ? `<div class="task-files file-chips">${taskFiles.map(fileChip).join('')}</div>` : ''}
     </li>`;
   }
 
   // ---------- Task search + status filter ----------
-  const statusLabel = (s) => s.charAt(0).toUpperCase() + s.slice(1); // monday has "canceled" in lower case
-
   function taskToolsHtml(tasks, statuses) {
     const count = (label) => tasks.filter((t) => t.status === label).length;
     const chips = statuses.map((s) => {
       const n = count(s.label);
       return `<button type="button" class="fchip ${n ? '' : 'zero'}" data-status="${esc(s.label)}" aria-pressed="false">
-        <span class="dot" style="background:${esc(s.color)}"></span>${esc(statusLabel(s.label))}<span class="n">${n}</span></button>`;
+        <span class="dot" style="background:${esc(s.color)}"></span>${esc(he(s.label))}<span class="n">${n}</span></button>`;
     }).join('');
     return `<div class="task-tools">
-      <div class="search">${icon('search')}<input type="search" id="taskSearch" placeholder="Search tasks by name, person, description…" aria-label="Search tasks" dir="auto"></div>
-      <div class="status-filter" role="group" aria-label="Filter by status">
-        <button type="button" class="fchip" data-status="" aria-pressed="true">All<span class="n">${tasks.length}</span></button>${chips}
+      <div class="search">${icon('search')}<input type="search" id="taskSearch" placeholder="חיפוש משימות לפי שם, אחראי, תיאור…" aria-label="חיפוש משימות" dir="auto"></div>
+      <div class="status-filter" role="group" aria-label="סינון לפי סטטוס">
+        <button type="button" class="fchip" data-status="" aria-pressed="true">הכל<span class="n">${tasks.length}</span></button>${chips}
       </div>
       <div class="task-results" id="taskResults" aria-live="polite"></div>
     </div>`;
@@ -735,7 +750,7 @@
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.status === status)));
       empty.hidden = shown > 0;
       empty.parentElement.scrollTop = 0; // show the first match, not wherever the list was scrolled to
-      results.textContent = shown === rows.length ? '' : `Showing ${shown} of ${rows.length} tasks`;
+      results.textContent = shown === rows.length ? '' : `מוצגות ${shown} מתוך ${rows.length} משימות`;
       results.hidden = !results.textContent;
     }
 
@@ -754,35 +769,35 @@
   }
 
   const existingRow = (f) => fileRow(f, [f.ext.toUpperCase(), formatSize(f.size)].filter(Boolean).join(' · '), `
-    <button type="button" class="icon-btn view" data-preview="${esc(f.key)}">${icon('eye')}<span class="lbl">View</span></button>
-    <a class="icon-btn ghost" href="${esc(f.downloadUrl)}" download aria-label="Download ${esc(f.name)}">${icon('download')}</a>`);
+    <button type="button" class="icon-btn view" data-preview="${esc(f.key)}">${icon('eye')}<span class="lbl">צפייה</span></button>
+    <a class="icon-btn ghost" href="${esc(f.downloadUrl)}" download aria-label="הורדת ${esc(f.name)}">${icon('download')}</a>`);
 
   function render(data) {
     const f = data.fields, m = data.meta, titles = m.titles;
-    document.title = 'Interview review: ' + data.item.name;
+    document.title = 'בדיקת ראיון: ' + data.item.name;
     const summaryFiles = (f.meetingSummaryFiles || []).map((x) => track(remoteFile(x)));
-    const chip = (label, value) => `<span class="chip">${esc(label)}: <b dir="auto">${value ? esc(value) : 'Not set'}</b></span>`;
-    f.rejectionReasons = f.rejectionReasons || [];
-    const rejected = f.rejectionReasons.length > 0; // reasons saved earlier mean the volunteer was rejected
+    const chip = (label, value) => `<span class="chip">${esc(label)}: <b dir="auto">${value ? esc(he(value)) : 'לא נקבע'}</b></span>`;
+    const rejected = !!f.rejected; // an answer saved earlier means the volunteer was marked as rejected
+    const n = data.tasks.length;
 
     app.innerHTML = `
       <header class="page">
-        <p class="eyebrow">Interview review · item ${esc(data.item.id)}</p>
+        <p class="eyebrow">בדיקת ראיון · פריט ${esc(data.item.id)}</p>
         <h1 dir="auto">${esc(data.item.name)}</h1>
-        <p class="interviewer ${f.interviewerName ? '' : 'missing'}">${icon('user')}Interviewer:
-          <b dir="auto">${f.interviewerName ? esc(f.interviewerName) : 'Not assigned'}</b></p>
+        <p class="interviewer ${f.interviewerName ? '' : 'missing'}">${icon('user')}מראיין:
+          <b dir="auto">${f.interviewerName ? esc(f.interviewerName) : 'לא שובץ'}</b></p>
         <div class="chips">
-          ${chip(titles.status, f.status)}
-          ${chip(titles.recommendation, f.recommendation)}
-          ${chip(titles.garin, f.garin)}
-          <span class="chip"><b>${data.tasks.length}</b> linked task${data.tasks.length === 1 ? '' : 's'}</span>
+          ${chip('סטטוס המסמך', f.status)}
+          ${chip('סטטוס המלצה', f.recommendation)}
+          ${chip('גרעין', f.garin)}
+          <span class="chip">${n === 1 ? 'משימה מקושרת אחת' : `<b>${n}</b> משימות מקושרות`}</span>
         </div>
       </header>
       <div class="grid">
         <section class="panel form-panel" id="formPanel">
           <div class="panel-head"><div>
-            <h2>Your review</h2>
-            <p class="sub">Check the details, change what’s needed, then save.</p>
+            <h2>הבדיקה שלך</h2>
+            <p class="sub" dir="auto">יש להוריד את הראיון, לשנות במידת הצורך ולהעלות את המסמך המתוקן</p>
           </div></div>
           <form id="reviewForm" novalidate>
             <div class="form-scroll">
@@ -790,48 +805,45 @@
               <span class="label" dir="auto">${esc(titles.meetingSummary)}${summaryFiles.length ? `<span class="count">${summaryFiles.length}</span>` : ''}</span>
               ${summaryFiles.length
                 ? `<ul class="file-list existing">${summaryFiles.map(existingRow).join('')}</ul>`
-                : '<p class="hint" style="margin:0 0 10px">No file attached yet.</p>'}
+                : '<p class="hint" style="margin:0 0 10px">עדיין לא צורף קובץ.</p>'}
               <label class="drop" id="drop">
                 ${icon('upload')}
-                <span><strong>Choose a file</strong> or drag it here</span>
-                <span>One new or updated summary, up to 3 MB</span>
+                <span dir="auto"><strong>העלה את הקובץ המתוקן</strong></span>
                 <input type="file" id="summaryFile">
               </label>
               <ul class="file-list" id="pendingList"></ul>
             </div>
             <div class="field">
-              <label for="garin">${esc(titles.garin)}</label>
+              <label for="garin" dir="auto">בחר מהרשימה גרעין מומלץ/מבוקש</label>
               ${selectHtml('garin', m.garinOptions, f.garin)}
             </div>
             <div class="field">
-              <label for="interviewerNotes">${esc(titles.interviewerNotes)}</label>
+              <label for="interviewerNotes" dir="auto">אם יש יותר מגרעין אחד מומלץ, או אין בכלל – כתוב את השמות וההסברים. בנוסף הרחב כאן בכל מה שחשוב לדעת</label>
               <textarea id="interviewerNotes" dir="auto">${esc(f.interviewerNotes)}</textarea>
             </div>
-            <div class="field">
-              <label for="rejected">Rejected?</label>
-              <div class="select"><select id="rejected">
-                <option value="No" ${rejected ? '' : 'selected'}>No</option>
-                <option value="Yes" ${rejected ? 'selected' : ''}>Yes</option>
-              </select></div>
-            </div>
-            <fieldset class="field" id="reasonsField" ${rejected ? '' : 'hidden'}>
-              <legend class="label">Rejection reasons</legend>
-              <div class="checks">${(m.rejectionReasons || []).map((r) => `
-                <label class="check"><input type="checkbox" name="rejectionReason" value="${esc(r)}" ${f.rejectionReasons.includes(r) ? 'checked' : ''}><span dir="auto">${esc(r)}</span></label>`).join('')}
+            <fieldset class="field">
+              <legend class="label">האם המתנדב נדחה?</legend>
+              <div class="radios">
+                <label class="check"><input type="radio" name="rejected" value="No" ${rejected ? '' : 'checked'}><span>לא</span></label>
+                <label class="check"><input type="radio" name="rejected" value="Yes" ${rejected ? 'checked' : ''}><span>כן</span></label>
               </div>
-              <p class="hint">The selected reasons are added to ${esc(titles.interviewerNotes)} when you save.</p>
             </fieldset>
+            <div class="field" id="detailsField" ${rejected ? '' : 'hidden'}>
+              <label for="rejectionDetails" dir="auto">${esc(m.rejectionQuestion)}</label>
+              <textarea id="rejectionDetails" dir="auto">${esc(f.rejectionDetails || '')}</textarea>
+              <p class="hint">התשובה תתווסף להערות המראיין בעת השליחה.</p>
+            </div>
             <div class="field">
-              <label for="status">${esc(titles.status)}</label>
+              <label for="status" dir="auto">סטטוס המסמך</label>
               ${selectHtml('status', m.statusOptions, f.status)}
             </div>
             <div class="field">
-              <label for="recommendation">${esc(titles.recommendation)}</label>
+              <label for="recommendation">סטטוס המלצה</label>
               ${selectHtml('recommendation', m.recommendationOptions, f.recommendation)}
             </div>
             </div>
             <div class="form-actions">
-              <button type="submit" class="primary" id="saveBtn">Save review</button>
+              <button type="submit" class="primary" id="saveBtn">שלח לעידכון</button>
               <div class="msg" id="msg" role="status" aria-live="polite"></div>
             </div>
           </form>
@@ -839,27 +851,26 @@
 
         <section class="panel tasks-panel">
           <div class="panel-head"><div>
-            <h2>Tasks${data.tasks.length ? `<span class="count">${data.tasks.length}</span>` : ''}</h2>
-            <p class="sub">Linked tasks from the task list. These are for reference and can’t be edited here.</p>
+            <h2>משימות${n ? `<span class="count">${n}</span>` : ''}</h2>
+            <p class="sub">משימות מקושרות מטבלת המשימות. לעיון בלבד, לא ניתן לערוך אותן כאן.</p>
           </div></div>
           ${data.tasks.length ? `
             ${taskToolsHtml(data.tasks, m.taskStatuses || [])}
             <div class="task-scroll">
               <ul class="tasks" id="taskList">${data.tasks.map(taskHtml).join('')}</ul>
-              <div class="empty-state" id="taskEmpty" hidden><strong>No tasks match</strong>
-                <button type="button" class="link-btn" id="taskReset">Clear search and filter</button></div>
+              <div class="empty-state" id="taskEmpty" hidden><strong>אין משימות תואמות</strong>
+                <button type="button" class="link-btn" id="taskReset">ניקוי החיפוש והסינון</button></div>
             </div>`
-          : '<div class="task-scroll"><div class="empty-state"><strong>No tasks yet</strong>No tasks are linked to this volunteer.</div></div>'}
+          : '<div class="task-scroll"><div class="empty-state"><strong>אין עדיין משימות</strong>אין משימות שמקושרות למתנדב הזה.</div></div>'}
         </section>
       </div>`;
 
     setupUploads();
     if (data.tasks.length) setupTaskFilter(data.tasks);
 
-    const rejectedSelect = document.getElementById('rejected');
-    rejectedSelect.addEventListener('change', () => {
-      document.getElementById('reasonsField').hidden = rejectedSelect.value !== 'Yes';
-    });
+    document.querySelectorAll('input[name="rejected"]').forEach((r) => r.addEventListener('change', () => {
+      document.getElementById('detailsField').hidden = rejectedValue() !== 'Yes';
+    }));
 
     app.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-preview]');
@@ -899,19 +910,21 @@
   function drawPending() {
     const f = newFile;
     document.getElementById('drop').hidden = !!f;
-    document.getElementById('pendingList').innerHTML = f ? fileRow(f, `${formatSize(f.size)} · new, not saved yet`, `
-      <button type="button" class="icon-btn view" data-preview="${esc(f.key)}">${icon('eye')}<span class="lbl">View</span></button>
-      <button type="button" class="icon-btn ghost" data-remove aria-label="Remove ${esc(f.name)}">${icon('close')}</button>`) : '';
+    document.getElementById('pendingList').innerHTML = f ? fileRow(f, `${formatSize(f.size)} · חדש, עדיין לא נשלח`, `
+      <button type="button" class="icon-btn view" data-preview="${esc(f.key)}">${icon('eye')}<span class="lbl">צפייה</span></button>
+      <button type="button" class="icon-btn ghost" data-remove aria-label="הסרת ${esc(f.name)}">${icon('close')}</button>`) : '';
   }
 
   function readFile(file) {
     return new Promise((resolve, reject) => {
       const r = new FileReader();
       r.onload = () => resolve({ name: file.name, type: file.type, data: String(r.result).split(',')[1] || '' });
-      r.onerror = () => reject(new Error('Could not read ' + file.name));
+      r.onerror = () => reject(new Error('לא ניתן לקרוא את הקובץ ' + file.name));
       r.readAsDataURL(file);
     });
   }
+
+  const rejectedValue = () => (document.querySelector('input[name="rejected"]:checked') || {}).value || 'No';
 
   async function submit(id) {
     const btn = document.getElementById('saveBtn');
@@ -920,21 +933,20 @@
 
     if (newFile && newFile.size > MAX_FILE_BYTES) {
       msg.className = 'msg err';
-      msg.textContent = 'The selected file is larger than 3 MB. Choose a smaller file and save again.';
+      msg.textContent = 'הקובץ שנבחר גדול מ־3 MB. יש לבחור קובץ קטן יותר ולשלוח שוב.';
       return;
     }
 
-    const rejected = document.getElementById('rejected').value;
-    const rejectionReasons = rejected === 'Yes'
-      ? Array.from(document.querySelectorAll('input[name="rejectionReason"]:checked'), (c) => c.value)
-      : [];
-    if (rejected === 'Yes' && !rejectionReasons.length) {
+    const rejected = rejectedValue();
+    const rejectionDetails = rejected === 'Yes' ? document.getElementById('rejectionDetails').value.trim() : '';
+    if (rejected === 'Yes' && !rejectionDetails) {
       msg.className = 'msg err';
-      msg.textContent = 'Choose at least one rejection reason, or set Rejected? to No.';
+      msg.textContent = 'יש לפרט אילו נושאים עלולים לעכב את המשך התהליך, או לסמן "לא".';
+      document.getElementById('rejectionDetails').focus();
       return;
     }
 
-    btn.disabled = true; btn.textContent = 'Saving…';
+    btn.disabled = true; btn.textContent = 'שולח…';
     const status = document.getElementById('status').value;
     try {
       const newFiles = newFile ? [await readFile(newFile.file)] : [];
@@ -945,7 +957,7 @@
           itemId: id,
           interviewerNotes: document.getElementById('interviewerNotes').value,
           rejected,
-          rejectionReasons,
+          rejectionDetails,
           status,
           recommendation: document.getElementById('recommendation').value,
           garin: document.getElementById('garin').value,
@@ -953,21 +965,21 @@
         }),
       });
       const out = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(out.error || 'The review could not be saved.');
+      if (!res.ok) throw new Error(out.error || 'לא ניתן לשלוח את הבדיקה.');
 
       document.getElementById('formPanel').innerHTML = `
         <div class="done">
           <span class="tick">${icon('check')}</span>
-          <h2>Review saved</h2>
-          <p class="hint">Thanks. Your changes were sent to monday.com. They can take a minute to show up, so if the form looks unchanged, wait a moment and reload again.</p>
-          <div class="chips saved-status" style="justify-content:center"><span class="chip">Status: <b>${esc(status || 'Not set')}</b></span></div>
-          <button type="button" class="primary" id="backBtn">${icon('reload')}Back to the form</button>
+          <h2>הבדיקה נשלחה</h2>
+          <p class="hint">תודה. השינויים נשלחו ל־monday.com. ייתכן שיעבור רגע עד שיופיעו, כך שאם הטופס נראה ללא שינוי, המתינו רגע וטענו את הדף מחדש.</p>
+          <div class="chips saved-status" style="justify-content:center"><span class="chip">סטטוס המסמך: <b dir="auto">${esc(status ? he(status) : 'לא נקבע')}</b></span></div>
+          <button type="button" class="primary" id="backBtn">${icon('reload')}חזרה לטופס</button>
         </div>`;
       document.getElementById('backBtn').addEventListener('click', () => location.reload());
     } catch (e) {
       msg.className = 'msg err';
-      msg.textContent = e.message + ' Try again.';
-      btn.disabled = false; btn.textContent = 'Save review';
+      msg.textContent = e.message + ' נסו שוב.';
+      btn.disabled = false; btn.textContent = 'שלח לעידכון';
     }
   }
 })();

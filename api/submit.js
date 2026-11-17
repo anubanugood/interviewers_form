@@ -15,16 +15,16 @@ module.exports = async (req, res) => {
   }
 
   const webhookUrl = process.env.WEBHOOK_URL;
-  if (!webhookUrl) return res.status(500).json({ error: 'WEBHOOK_URL is not configured.' });
+  if (!webhookUrl) return res.status(500).json({ error: 'כתובת ה־webhook לא הוגדרה (WEBHOOK_URL).' });
 
   let body = req.body;
   if (typeof body === 'string') {
-    try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON.' }); }
+    try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'הבקשה אינה תקינה.' }); }
   }
   body = body || {};
 
   const itemId = String(body.itemId || '').trim();
-  if (!/^\d+$/.test(itemId)) return res.status(400).json({ error: 'Missing item id.' });
+  if (!/^\d+$/.test(itemId)) return res.status(400).json({ error: 'חסר מספר פריט.' });
 
   const c = CONFIG.columns;
   const status = str(body.status, 200);
@@ -32,23 +32,18 @@ module.exports = async (req, res) => {
   const garin = str(body.garin, 200);
   for (const [value, col] of [[status, c.status], [recommendation, c.recommendation], [garin, c.garin]]) {
     if (value && !col.options.includes(value)) {
-      return res.status(400).json({ error: `"${value}" is not a valid ${col.title} value.` });
+      return res.status(400).json({ error: `"${value}" אינו ערך תקין עבור ${col.title}.` });
     }
   }
 
   const rejected = body.rejected === 'Yes' ? 'Yes' : 'No';
-  const pickedReasons = rejected === 'Yes' && Array.isArray(body.rejectionReasons) ? body.rejectionReasons : [];
-  const unknownReason = pickedReasons.find((r) => !CONFIG.rejectionReasons.includes(r));
-  if (unknownReason !== undefined) {
-    return res.status(400).json({ error: `"${unknownReason}" is not a valid rejection reason.` });
-  }
-  const rejectionReasons = CONFIG.rejectionReasons.filter((r) => pickedReasons.includes(r));
-  if (rejected === 'Yes' && !rejectionReasons.length) {
-    return res.status(400).json({ error: 'Choose at least one rejection reason.' });
+  const rejectionDetails = rejected === 'Yes' ? str(body.rejectionDetails, 5000).trim() : '';
+  if (rejected === 'Yes' && !rejectionDetails) {
+    return res.status(400).json({ error: 'יש לפרט אילו נושאים עלולים לעכב את המשך התהליך.' });
   }
 
   const newFiles = Array.isArray(body.newFiles) ? body.newFiles : [];
-  if (newFiles.length > 1) return res.status(400).json({ error: 'Upload one summary file only.' });
+  if (newFiles.length > 1) return res.status(400).json({ error: 'ניתן להעלות קובץ סיכום אחד בלבד.' });
   let total = 0;
   const cleanFiles = [];
   for (const f of newFiles) {
@@ -63,18 +58,18 @@ module.exports = async (req, res) => {
     });
   }
   if (total > MAX_TOTAL_FILE_BYTES) {
-    return res.status(413).json({ error: 'Files are too large. Keep the total under 3 MB.' });
+    return res.status(413).json({ error: 'הקובץ גדול מדי. הגודל המרבי הוא 3 MB.' });
   }
 
   try {
     // Re-read the item so the webhook gets trustworthy previous values.
     const item = await loadMainItem(itemId);
-    if (!item) return res.status(404).json({ error: 'Item not found on the Main Volunteers Board.' });
+    if (!item) return res.status(404).json({ error: 'הפריט לא נמצא בטבלת המתנדבים הראשית.' });
     const prev = item.fields;
 
     const next = {
-      // long text column, not capped at 2000 like text columns; the picked rejection reasons are appended
-      interviewerNotes: withRejection(str(body.interviewerNotes, 20000), rejectionReasons),
+      // long text column, not capped at 2000 like text columns; the rejection question and answer are appended
+      interviewerNotes: withRejection(str(body.interviewerNotes, 20000), rejectionDetails),
       status,
       recommendation,
       garin,
@@ -115,8 +110,8 @@ module.exports = async (req, res) => {
       item: { id: item.id, name: item.name, boardId: item.boardId },
       values: {
         interviewerNotes: next.interviewerNotes,
-        rejected,
-        rejectionReasons,
+        rejected: rejected === 'Yes' ? CONFIG.rejectedLabel : 'No',
+        rejectionDetails,
         status: next.status,
         recommendationStatus: next.recommendation,
         garin: next.garin,
@@ -134,11 +129,11 @@ module.exports = async (req, res) => {
     if (!hook.ok) {
       const text = await hook.text().catch(() => '');
       console.error('Webhook error', hook.status, text);
-      return res.status(502).json({ error: `The webhook rejected the submission (HTTP ${hook.status}).` });
+      return res.status(502).json({ error: `ה־webhook דחה את השליחה (HTTP ${hook.status}).` });
     }
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Submission failed: ' + err.message });
+    return res.status(500).json({ error: 'השליחה נכשלה: ' + err.message });
   }
 };

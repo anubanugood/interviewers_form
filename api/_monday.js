@@ -23,17 +23,10 @@ const CONFIG = {
     },
     tasks: { id: 'board_relation_mm7y2gqg', title: 'קישור לטבלת משימות' },
   },
-  // Shown when the interviewer marks the volunteer as rejected; the picked ones are saved into Interviewer's Notes.
-  rejectionReasons: [
-    'Not a good fit for the program',
-    'Insufficient motivation or commitment',
-    'Availability does not match the required commitment',
-    'Does not meet eligibility requirements',
-    'Language barrier',
-    'Concerns from references or background check',
-    'Health or wellbeing concerns',
-    'Did not attend the interview',
-  ],
+  // Free-text question shown when the volunteer is marked as rejected; the answer is saved into Interviewer's Notes.
+  rejectionQuestion: 'האם לדעתך יש נושאים שעלולים לעכב את המשך התהליך מול המתנדב אם לא ייפתרו?',
+  // Sent as values.rejected in the webhook when Rejected? is Yes (otherwise "No").
+  rejectedLabel: 'יש לפתור בעיות לפני השיבוץ',
   // Task List board columns (Interviewer Name and Interview Date & Time mirrors are intentionally excluded)
   taskColumns: {
     personInCharge: 'multiple_person_mm7yg5bc',
@@ -197,27 +190,39 @@ async function findItemAsset(itemId, assetId) {
   return null;
 }
 
-// Rejection reasons live in a block at the end of Interviewer's Notes (there is no column for them):
-//   Rejection reasons:
-//   - Language barrier
-const REJECTION_BLOCK = /(?:^|\n+)Rejection reasons:\n((?:- .*(?:\n|$))+)\s*$/;
+// When the volunteer is marked as rejected, the answer to CONFIG.rejectionQuestion is kept in a block at the
+// end of Interviewer's Notes (there is no column for it):
+//   <rejectionQuestion>
+//   <free-text answer, may span several lines>
+// Notes saved by older versions of the form may also have a "Rejection reasons:" list (one "- reason" per
+// line) before it, or instead of it; those reasons are carried over into the answer.
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const LEGACY_REASONS = 'Rejection reasons:\\n((?:- .*(?:\\n|$))+)';
+const REJECTION_BLOCK = new RegExp(
+  '(?:^|\\n+)(?:' + LEGACY_REASONS + '\\n*)?' + escapeRe(CONFIG.rejectionQuestion) + '\\n([\\s\\S]*?)\\s*$'
+);
+const LEGACY_BLOCK = new RegExp('(?:^|\\n+)' + LEGACY_REASONS + '\\s*$');
 
-// Splits the notes into the interviewer's own text and the reasons saved by a previous submission.
+// Splits the notes into the interviewer's own text and the rejection answer saved by a previous submission.
 function splitRejection(notes) {
   const text = String(notes || '');
-  const m = text.match(REJECTION_BLOCK);
-  if (!m) return { notes: text, reasons: [] };
+  const m = text.match(REJECTION_BLOCK) || text.match(LEGACY_BLOCK);
+  if (!m) return { notes: text, rejected: false, details: '' };
+  const legacy = (m[1] || '').trim();
+  const answer = (m[2] || '').trim();
   return {
     notes: text.slice(0, m.index),
-    reasons: m[1].split('\n').map((l) => l.replace(/^- /, '').trim()).filter(Boolean),
+    rejected: true,
+    details: [legacy, answer].filter(Boolean).join('\n'),
   };
 }
 
-// Replaces any existing reasons block with the given reasons (none: the block is removed).
-function withRejection(notes, reasons) {
+// Replaces any existing rejection block with the given answer (empty answer: the block is removed).
+function withRejection(notes, details = '') {
   const base = splitRejection(notes).notes;
-  if (!reasons.length) return base;
-  const block = 'Rejection reasons:\n' + reasons.map((r) => '- ' + r).join('\n');
+  const answer = String(details || '').trim();
+  if (!answer) return base;
+  const block = CONFIG.rejectionQuestion + '\n' + answer;
   return base.trim() ? base.trimEnd() + '\n\n' + block : block;
 }
 

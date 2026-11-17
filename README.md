@@ -12,8 +12,9 @@ Open: `https://<your-project>.vercel.app/?itemId=<Main Volunteers Board item id>
 
 ## Webhook payload (POST, JSON)
 - `item` – id, name, boardId
-- `values` – interviewerNotes (with a "Rejection reasons:" block appended when rejected), rejected ("Yes"/"No"),
-  rejectionReasons [string], status, recommendationStatus, garin,
+- `values` – interviewerNotes (with the rejection question and its answer appended when rejected),
+  rejected ("יש לפתור בעיות לפני השיבוץ" when rejected, otherwise "No"),
+  rejectionDetails (answer to the rejection question, "" when not rejected), status, recommendationStatus, garin,
   meetingSummaryNewFiles [{name, mimeType, size, base64}] (at most one file: the summary uploaded in this submission)
 - `columns` – keyed by column id, each with title, value, previous, changed
 - `mondayColumnValues` – JSON string ready for change_multiple_column_values (text + status columns)

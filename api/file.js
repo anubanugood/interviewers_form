@@ -38,14 +38,14 @@ module.exports = async (req, res) => {
 
   if (!/^\d+$/.test(itemId) || !/^\d+$/.test(assetId)) {
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(400).json({ error: 'Add ?itemId=<item id>&assetId=<file id> to the link.' });
+    return res.status(400).json({ error: 'יש להוסיף לקישור ?itemId= ו־&assetId= (מספר הפריט ומספר הקובץ).' });
   }
 
   try {
     const asset = await findItemAsset(itemId, assetId);
     if (!asset || !asset.url) {
       res.setHeader('Cache-Control', 'no-store');
-      return res.status(404).json({ error: 'This file is not attached to the item.' });
+      return res.status(404).json({ error: 'הקובץ הזה לא מצורף לפריט.' });
     }
 
     if (Number(asset.size) > MAX_PROXY_BYTES) {
@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
     const upstream = await fetch(asset.url);
     if (!upstream.ok) {
       res.setHeader('Cache-Control', 'no-store');
-      return res.status(502).json({ error: `monday.com returned HTTP ${upstream.status} for the file.` });
+      return res.status(502).json({ error: `monday.com החזיר שגיאה (HTTP ${upstream.status}) עבור הקובץ.` });
     }
     const body = Buffer.from(await upstream.arrayBuffer());
 
@@ -74,6 +74,6 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(500).json({ error: 'Could not load the file: ' + err.message });
+    return res.status(500).json({ error: 'לא ניתן לטעון את הקובץ: ' + err.message });
   }
 };
