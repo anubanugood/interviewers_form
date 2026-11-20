@@ -2,6 +2,8 @@ const { CONFIG, loadMainItem, withRejection } = require('./_monday');
 
 // Vercel serverless request bodies are capped at ~4.5 MB; base64 adds ~33%.
 const MAX_TOTAL_FILE_BYTES = 3 * 1024 * 1024;
+// Only documents may be uploaded as the meeting summary (same list as ALLOWED_EXTS in index.html).
+const ALLOWED_EXTS = ['pdf', 'doc', 'docx', 'odt', 'rtf'];
 
 function str(v, max = 5000) {
   return typeof v === 'string' ? v.slice(0, max) : '';
@@ -28,9 +30,9 @@ module.exports = async (req, res) => {
 
   const c = CONFIG.columns;
   const status = str(body.status, 200);
-  const recommendation = str(body.recommendation, 200);
   const garin = str(body.garin, 200);
-  for (const [value, col] of [[status, c.status], [recommendation, c.recommendation], [garin, c.garin]]) {
+  if (!status) return res.status(400).json({ error: 'יש לבחור סטטוס מסמך.' });
+  for (const [value, col] of [[status, c.status], [garin, c.garin]]) {
     if (value && !col.options.includes(value)) {
       return res.status(400).json({ error: `"${value}" אינו ערך תקין עבור ${col.title}.` });
     }
@@ -39,7 +41,7 @@ module.exports = async (req, res) => {
   const rejected = body.rejected === 'Yes' ? 'Yes' : 'No';
   const rejectionDetails = rejected === 'Yes' ? str(body.rejectionDetails, 5000).trim() : '';
   if (rejected === 'Yes' && !rejectionDetails) {
-    return res.status(400).json({ error: 'יש לפרט אילו נושאים עלולים לעכב את המשך התהליך.' });
+    return res.status(400).json({ error: 'נא לכתוב את סיבת הדחייה.' });
   }
 
   const newFiles = Array.isArray(body.newFiles) ? body.newFiles : [];
@@ -48,6 +50,10 @@ module.exports = async (req, res) => {
   const cleanFiles = [];
   for (const f of newFiles) {
     if (!f || typeof f.data !== 'string' || !f.name) continue;
+    const ext = (String(f.name).match(/\.([a-z0-9]+)$/i) || [, ''])[1].toLowerCase();
+    if (!ALLOWED_EXTS.includes(ext)) {
+      return res.status(400).json({ error: 'ניתן להעלות רק קובצי PDF או Word (PDF, DOC, DOCX, ODT, RTF).' });
+    }
     const bytes = Math.floor((f.data.length * 3) / 4);
     total += bytes;
     cleanFiles.push({
@@ -71,7 +77,6 @@ module.exports = async (req, res) => {
       // long text column, not capped at 2000 like text columns; the rejection question and answer are appended
       interviewerNotes: withRejection(str(body.interviewerNotes, 20000), rejectionDetails),
       status,
-      recommendation,
       garin,
     };
 
@@ -86,7 +91,6 @@ module.exports = async (req, res) => {
     const columns = {
       [c.interviewerNotes.id]: entry('interviewerNotes', c.interviewerNotes.title, c.interviewerNotes.id),
       [c.status.id]: entry('status', c.status.title, c.status.id),
-      [c.recommendation.id]: entry('recommendation', c.recommendation.title, c.recommendation.id),
       [c.garin.id]: entry('garin', c.garin.title, c.garin.id),
       [c.meetingSummary.id]: {
         columnId: c.meetingSummary.id,
@@ -100,7 +104,6 @@ module.exports = async (req, res) => {
     const mondayColumnValues = JSON.stringify({
       [c.interviewerNotes.id]: { text: next.interviewerNotes },
       [c.status.id]: next.status ? { label: next.status } : null,
-      [c.recommendation.id]: next.recommendation ? { label: next.recommendation } : null,
       [c.garin.id]: next.garin ? { label: next.garin } : null,
     });
 
@@ -110,10 +113,9 @@ module.exports = async (req, res) => {
       item: { id: item.id, name: item.name, boardId: item.boardId },
       values: {
         interviewerNotes: next.interviewerNotes,
-        rejected: rejected === 'Yes' ? CONFIG.rejectedLabel : 'No',
+        rejected: rejected === 'Yes' ? CONFIG.rejectedLabel : '',
         rejectionDetails,
         status: next.status,
-        recommendationStatus: next.recommendation,
         garin: next.garin,
         meetingSummaryNewFiles: cleanFiles, // 0 or 1 file: only the summary uploaded in this submission
       },

@@ -410,6 +410,31 @@
   .dlg-head .meta { flex: 1; min-width: 0; }
   .dlg-head .file-name { font-size: 16px; }
   .dlg-body { flex: 1; overflow: auto; background: var(--surface-2); overscroll-behavior: contain; }
+  /* Document status popup, shown when the form is sent */
+  dialog.status-dialog {
+    width: min(440px, 100vw - 32px);
+    padding: 0; border: 0; border-radius: var(--radius-lg);
+    background: var(--surface); color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+  dialog.status-dialog::backdrop { background: rgba(8, 18, 15, .6); backdrop-filter: blur(2px); }
+  .status-dialog form { margin: 0; padding: 22px; }
+  .status-dialog h2 { margin: 0 0 4px; font-size: 20px; }
+  .status-dialog .sub { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
+  .status-dialog .checks { gap: 8px; }
+  .status-dialog .check { align-items: center; padding: 12px 14px; font-size: 16px; font-weight: 600; }
+  .status-dialog .check input { margin: 0; }
+  .status-dialog .msg:empty { display: none; }
+  .dlg-actions { display: flex; gap: 8px; margin-top: 18px; }
+  .dlg-actions button.primary { flex: 1; width: auto; font-size: 17px; padding: 12px; }
+  .dlg-actions button.secondary {
+    flex: none; padding: 12px 18px;
+    font: inherit; font-weight: 600; font-size: 16px;
+    border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+    background: transparent; color: var(--ink); cursor: pointer;
+  }
+  .dlg-actions button.secondary:hover { background: var(--surface-2); }
+
   @media (max-width: 640px) {
     dialog.viewer-dialog { width: 100vw; height: 100dvh; border-radius: 0; }
     .icon-btn .lbl { display: none; }
@@ -434,12 +459,30 @@
   <div class="dlg-body" id="dlgBody"></div>
 </dialog>
 
+<dialog class="status-dialog" id="statusDialog" aria-labelledby="statusDlgTitle">
+  <form id="statusForm" novalidate>
+    <h2 id="statusDlgTitle">סטטוס המסמך</h2>
+    <p class="sub">יש לבחור סטטוס לפני השליחה.</p>
+    <fieldset class="field" style="margin:0">
+      <legend class="label" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">סטטוס המסמך</legend>
+      <div class="checks" id="statusChoices"></div>
+    </fieldset>
+    <div class="msg err" id="statusMsg" role="alert"></div>
+    <div class="dlg-actions">
+      <button type="submit" class="primary" id="statusConfirm">שלח</button>
+      <button type="button" class="secondary" id="statusCancel">ביטול</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 (function () {
   const app = document.getElementById('app');
   const params = new URLSearchParams(location.search);
   const itemId = (params.get('itemId') || params.get('item_id') || params.get('id') || '').trim();
   const MAX_FILE_BYTES = 3 * 1024 * 1024;
+  // Only documents may be uploaded as the meeting summary (also enforced in api/submit.js).
+  const ALLOWED_EXTS = ['pdf', 'doc', 'docx', 'odt', 'rtf'];
   // Matches MAX_PROXY_BYTES in api/file.js; above it the API redirects to monday's download link.
   const MAX_PREVIEW_BYTES = 4 * 1024 * 1024;
   const JSZIP_SRC = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
@@ -788,7 +831,6 @@
           <b dir="auto">${f.interviewerName ? esc(f.interviewerName) : 'לא שובץ'}</b></p>
         <div class="chips">
           ${chip('סטטוס המסמך', f.status)}
-          ${chip('סטטוס המלצה', f.recommendation)}
           ${chip('גרעין', f.garin)}
           <span class="chip">${n === 1 ? 'משימה מקושרת אחת' : `<b>${n}</b> משימות מקושרות`}</span>
         </div>
@@ -809,8 +851,10 @@
               <label class="drop" id="drop">
                 ${icon('upload')}
                 <span dir="auto"><strong>העלה את הקובץ המתוקן</strong></span>
-                <input type="file" id="summaryFile">
+                <span class="hint">PDF או Word בלבד (PDF, DOC, DOCX, ODT, RTF)</span>
+                <input type="file" id="summaryFile" accept="${ALLOWED_EXTS.map((x) => '.' + x).join(',')}">
               </label>
+              <div class="msg err" id="fileMsg" role="alert" hidden></div>
               <ul class="file-list" id="pendingList"></ul>
             </div>
             <div class="field">
@@ -822,24 +866,16 @@
               <textarea id="interviewerNotes" dir="auto">${esc(f.interviewerNotes)}</textarea>
             </div>
             <fieldset class="field">
-              <legend class="label">האם המתנדב נדחה?</legend>
+              <legend class="label" dir="auto">${esc(m.rejectionQuestion)}</legend>
               <div class="radios">
                 <label class="check"><input type="radio" name="rejected" value="No" ${rejected ? '' : 'checked'}><span>לא</span></label>
                 <label class="check"><input type="radio" name="rejected" value="Yes" ${rejected ? 'checked' : ''}><span>כן</span></label>
               </div>
             </fieldset>
             <div class="field" id="detailsField" ${rejected ? '' : 'hidden'}>
-              <label for="rejectionDetails" dir="auto">${esc(m.rejectionQuestion)}</label>
+              <label for="rejectionDetails" dir="auto">נא לכתוב את סיבת הדחייה</label>
               <textarea id="rejectionDetails" dir="auto">${esc(f.rejectionDetails || '')}</textarea>
               <p class="hint">התשובה תתווסף להערות המראיין בעת השליחה.</p>
-            </div>
-            <div class="field">
-              <label for="status" dir="auto">סטטוס המסמך</label>
-              ${selectHtml('status', m.statusOptions, f.status)}
-            </div>
-            <div class="field">
-              <label for="recommendation">סטטוס המלצה</label>
-              ${selectHtml('recommendation', m.recommendationOptions, f.recommendation)}
             </div>
             </div>
             <div class="form-actions">
@@ -865,6 +901,7 @@
         </section>
       </div>`;
 
+    statusOptions = m.statusOptions || [];
     setupUploads();
     if (data.tasks.length) setupTaskFilter(data.tasks);
 
@@ -887,10 +924,17 @@
   function setupUploads() {
     const input = document.getElementById('summaryFile');
     const drop = document.getElementById('drop');
+    const fileMsg = document.getElementById('fileMsg');
     const choose = (list) => {
       const picked = list && list[0];
       input.value = '';
       if (!picked) return;
+      if (!ALLOWED_EXTS.includes(extOf(picked.name))) {
+        fileMsg.textContent = `לא ניתן להעלות את הקובץ "${picked.name}". ניתן להעלות רק קובצי PDF או Word (PDF, DOC, DOCX, ODT, RTF).`;
+        fileMsg.hidden = false;
+        return;
+      }
+      fileMsg.hidden = true;
       if (newFile) files.delete(newFile.key);
       newFile = track(localFile(picked));
       drawPending();
@@ -926,6 +970,36 @@
 
   const rejectedValue = () => (document.querySelector('input[name="rejected"]:checked') || {}).value || 'No';
 
+  // ---------- Document status popup (required before sending) ----------
+  let statusOptions = [];
+  const statusDlg = document.getElementById('statusDialog');
+  const statusMsg = document.getElementById('statusMsg');
+  let statusResolve = null;
+  function askStatus() {
+    document.getElementById('statusChoices').innerHTML = statusOptions.map((o) => `
+      <label class="check"><input type="radio" name="docStatus" value="${esc(o)}"><span dir="auto">${esc(he(o))}</span></label>`).join('');
+    statusMsg.textContent = '';
+    return new Promise((resolve) => {
+      statusResolve = resolve;
+      if (typeof statusDlg.showModal === 'function') statusDlg.showModal(); else statusDlg.setAttribute('open', '');
+    });
+  }
+  function finishStatus(value) {
+    const done = statusResolve;
+    statusResolve = null;
+    if (statusDlg.open) statusDlg.close();
+    if (done) done(value);
+  }
+  document.getElementById('statusForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const picked = statusDlg.querySelector('input[name="docStatus"]:checked');
+    if (!picked) { statusMsg.textContent = 'יש לבחור סטטוס מסמך.'; return; }
+    finishStatus(picked.value);
+  });
+  document.getElementById('statusChoices').addEventListener('change', () => { statusMsg.textContent = ''; });
+  document.getElementById('statusCancel').addEventListener('click', () => finishStatus(null));
+  statusDlg.addEventListener('close', () => finishStatus(null)); // Esc key
+
   async function submit(id) {
     const btn = document.getElementById('saveBtn');
     const msg = document.getElementById('msg');
@@ -941,13 +1015,15 @@
     const rejectionDetails = rejected === 'Yes' ? document.getElementById('rejectionDetails').value.trim() : '';
     if (rejected === 'Yes' && !rejectionDetails) {
       msg.className = 'msg err';
-      msg.textContent = 'יש לפרט אילו נושאים עלולים לעכב את המשך התהליך, או לסמן "לא".';
+      msg.textContent = 'נא לכתוב את סיבת הדחייה, או לסמן "לא".';
       document.getElementById('rejectionDetails').focus();
       return;
     }
 
+    const status = await askStatus();
+    if (!status) return; // popup cancelled: nothing is sent
+
     btn.disabled = true; btn.textContent = 'שולח…';
-    const status = document.getElementById('status').value;
     try {
       const newFiles = newFile ? [await readFile(newFile.file)] : [];
       const res = await fetch('/api/submit', {
@@ -959,7 +1035,6 @@
           rejected,
           rejectionDetails,
           status,
-          recommendation: document.getElementById('recommendation').value,
           garin: document.getElementById('garin').value,
           newFiles,
         }),

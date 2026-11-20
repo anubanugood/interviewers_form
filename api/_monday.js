@@ -25,7 +25,7 @@ const CONFIG = {
   },
   // Free-text question shown when the volunteer is marked as rejected; the answer is saved into Interviewer's Notes.
   rejectionQuestion: 'האם לדעתך יש נושאים שעלולים לעכב את המשך התהליך מול המתנדב אם לא ייפתרו?',
-  // Sent as values.rejected in the webhook when Rejected? is Yes (otherwise "No").
+  // Sent as values.rejected in the webhook when Rejected? is Yes (otherwise "").
   rejectedLabel: 'יש לפתור בעיות לפני השיבוץ',
   // Task List board columns (Interviewer Name and Interview Date & Time mirrors are intentionally excluded)
   taskColumns: {
