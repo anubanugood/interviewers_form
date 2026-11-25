@@ -21,28 +21,11 @@ const CONFIG = {
       title: "Gar'in",
       options: ['מצפה רמון', 'נתיבות', 'צפת', 'מטולה', 'קריית שמונה', 'בית שאן', 'ערד', 'חצור'],
     },
-    tasks: { id: 'board_relation_mm7y2gqg', title: 'קישור לטבלת משימות' },
   },
   // Free-text question shown when the volunteer is marked as rejected; the answer is saved into Interviewer's Notes.
   rejectionQuestion: 'האם לדעתך יש נושאים שעלולים לעכב את המשך התהליך מול המתנדב אם לא ייפתרו?',
   // Sent as values.rejected in the webhook when Rejected? is Yes (otherwise "").
   rejectedLabel: 'יש לפתור בעיות לפני השיבוץ',
-  // Task List board columns (Interviewer Name and Interview Date & Time mirrors are intentionally excluded)
-  taskColumns: {
-    personInCharge: 'multiple_person_mm7yg5bc',
-    linkedVolunteer: 'board_relation_mm7yfya0',
-    status: 'color_mm7yhj00',
-    description: 'long_text_mm7y3ee6',
-    date: 'date_mm7y11fn',
-    comments: 'long_text_mm7yxztr',
-    files: 'file_mm7y9s3g',
-  },
-  taskStatusColors: {
-    'Working on it': '#fdab3d',
-    Done: '#00c875',
-    Stuck: '#df2f4a',
-    canceled: '#9d50dd',
-  },
 };
 
 async function mondayQuery(query, variables = {}) {
@@ -75,32 +58,13 @@ query ($id: [ID!]) {
     id
     name
     board { id }
-    column_values(ids: ["text_mm72jvzf","long_text_mm83m27z","color_mm8rrwba","color_mm8r7s7g","color_mm84zrka","board_relation_mm7y2gqg"]) {
+    column_values(ids: ["text_mm72jvzf","long_text_mm83m27z","color_mm8rrwba","color_mm8r7s7g","color_mm84zrka"]) {
       id
       type
       text
       ... on StatusValue { label }
-      ... on BoardRelationValue { linked_item_ids }
     }
     assets(column_ids: ["file_mm7fxnnf"]) { id name file_extension file_size public_url }
-  }
-}`;
-
-const TASKS_QUERY = `
-query ($ids: [ID!]) {
-  items(ids: $ids, limit: 100) {
-    id
-    name
-    board { id }
-    column_values(ids: ["multiple_person_mm7yg5bc","board_relation_mm7yfya0","color_mm7yhj00","long_text_mm7y3ee6","date_mm7y11fn","long_text_mm7yxztr"]) {
-      id
-      type
-      text
-      ... on StatusValue { label }
-      ... on BoardRelationValue { display_value }
-      ... on DateValue { date time }
-    }
-    assets(column_ids: ["file_mm7y9s3g"]) { id name file_extension file_size public_url }
   }
 }`;
 
@@ -133,61 +97,15 @@ async function loadMainItem(itemId) {
         url: a.public_url,
       })),
     },
-    linkedTaskIds: cv(item, c.tasks.id).linked_item_ids || [],
   };
 }
 
-async function loadTasks(ids) {
-  const tc = CONFIG.taskColumns;
-  const tasks = [];
-  for (let i = 0; i < ids.length; i += 100) {
-    const data = await mondayQuery(TASKS_QUERY, { ids: ids.slice(i, i + 100) });
-    for (const t of data.items || []) {
-      const status = cv(t, tc.status).label || '';
-      const date = cv(t, tc.date);
-      tasks.push({
-        id: t.id,
-        name: t.name,
-        boardId: t.board && t.board.id,
-        personInCharge: cv(t, tc.personInCharge).text || '',
-        linkedVolunteer: cv(t, tc.linkedVolunteer).display_value || '',
-        status,
-        statusColor: CONFIG.taskStatusColors[status] || null,
-        description: cv(t, tc.description).text || '',
-        date: date.text || '',
-        comments: cv(t, tc.comments).text || '',
-        files: (t.assets || []).map((a) => ({
-          assetId: a.id,
-          name: a.name,
-          extension: a.file_extension,
-          size: a.file_size,
-          url: a.public_url,
-        })),
-      });
-    }
-  }
-  // keep the order the tasks are linked in
-  const order = new Map(ids.map((id, i) => [String(id), i]));
-  tasks.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
-  return tasks;
-}
-
-// Returns the asset only if it belongs to this item's meeting summary or one of its linked tasks,
+// Returns the asset only if it belongs to this item's meeting summary,
 // so /api/file can't be used to read arbitrary files from the account.
 async function findItemAsset(itemId, assetId) {
   const item = await loadMainItem(itemId);
   if (!item) return null;
-  const same = (f) => String(f.assetId) === String(assetId);
-
-  const own = item.fields.meetingSummaryFiles.find(same);
-  if (own) return own;
-
-  const tasks = await loadTasks(item.linkedTaskIds);
-  for (const t of tasks) {
-    const f = t.files.find(same);
-    if (f) return f;
-  }
-  return null;
+  return item.fields.meetingSummaryFiles.find((f) => String(f.assetId) === String(assetId)) || null;
 }
 
 // When the volunteer is marked as rejected, the answer to CONFIG.rejectionQuestion is kept in a block at the
@@ -226,4 +144,4 @@ function withRejection(notes, details = '') {
   return base.trim() ? base.trimEnd() + '\n\n' + block : block;
 }
 
-module.exports = { CONFIG, mondayQuery, loadMainItem, loadTasks, findItemAsset, splitRejection, withRejection };
+module.exports = { CONFIG, mondayQuery, loadMainItem, findItemAsset, splitRejection, withRejection };

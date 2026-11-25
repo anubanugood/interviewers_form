@@ -1,4 +1,4 @@
-const { CONFIG, loadMainItem, loadTasks, splitRejection } = require('./_monday');
+const { CONFIG, loadMainItem, splitRejection } = require('./_monday');
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -13,14 +13,12 @@ module.exports = async (req, res) => {
     if (!item) {
       return res.status(404).json({ error: `הפריט ${itemId} לא נמצא בטבלת המתנדבים הראשית.` });
     }
-    const tasks = await loadTasks(item.linkedTaskIds);
     const c = CONFIG.columns;
     const rejection = splitRejection(item.fields.interviewerNotes);
 
     return res.status(200).json({
       item: { id: item.id, name: item.name, boardId: item.boardId },
       fields: { ...item.fields, interviewerNotes: rejection.notes, rejected: rejection.rejected, rejectionDetails: rejection.details },
-      tasks,
       meta: {
         titles: {
           interviewerNotes: c.interviewerNotes.title,
@@ -31,7 +29,6 @@ module.exports = async (req, res) => {
         statusOptions: c.status.options,
         garinOptions: c.garin.options,
         rejectionQuestion: CONFIG.rejectionQuestion,
-        taskStatuses: Object.entries(CONFIG.taskStatusColors).map(([label, color]) => ({ label, color })),
       },
     });
   } catch (err) {

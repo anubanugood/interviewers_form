@@ -67,19 +67,6 @@
   button { font: inherit; color: inherit; }
   :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-  /* Header */
-  header.page { margin-bottom: 28px; }
-  .eyebrow { margin: 0; color: var(--muted); font-size: 15px; font-weight: 600; letter-spacing: .02em; }
-  header.page h1 {
-    margin: 4px 0 14px;
-    font-size: clamp(32px, 5.5vw, 52px);
-    line-height: 1.05;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
-  .interviewer { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 18px; color: var(--muted); }
-  .interviewer b { color: var(--ink); font-weight: 700; }
-  .interviewer.missing b { color: var(--danger); }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip {
     display: inline-flex; align-items: center; gap: 6px;
@@ -88,36 +75,12 @@
   }
   .chip b { color: var(--ink); font-weight: 600; }
 
-  .grid { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
+  .form-panel { max-width: 760px; margin: 0 auto; }
   .form-actions { margin-top: 4px; }
-  /* Desktop: the form stays in view next to the (long) task list; its fields scroll inside it
-     and the save button is always visible at the bottom. */
-  @media (min-width: 980px) {
-    .grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; }
-    .form-panel {
-      position: sticky; top: 20px;
-      max-height: calc(100vh - 40px);
-      display: flex; flex-direction: column;
-      padding: 0; overflow: hidden;
-    }
-    .form-panel > .panel-head { padding: 22px 24px 0; margin-bottom: 14px; }
-    .form-panel form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-    .form-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 24px 4px; overscroll-behavior: contain; }
-    .form-actions { margin: 0; padding: 14px 24px 18px; border-top: 1px solid var(--line); background: var(--surface); }
-    .form-panel textarea { min-height: 110px; }
-
-    /* Same for tasks: heading, search and filter stay put, only the list scrolls */
-    .tasks-panel {
-      position: sticky; top: 20px;
-      max-height: calc(100vh - 40px);
-      display: flex; flex-direction: column;
-      padding: 0; overflow: hidden;
-    }
-    .tasks-panel > .panel-head { padding: 22px 24px 0; margin-bottom: 14px; }
-    .tasks-panel .task-tools { position: static; margin: 0; padding: 0 24px 12px; }
-    .task-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 24px 24px; overscroll-behavior: contain; }
-  }
-  .form-scroll, .task-scroll { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+  .intro { margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .intro h1 { margin: 0 0 10px; font-size: clamp(24px, 4.5vw, 30px); font-weight: 800; line-height: 1.2; }
+  .intro p { margin: 0 0 6px; font-size: 17px; }
+  .intro p:last-child { margin-bottom: 0; color: var(--muted); }
 
   .panel {
     background: var(--surface);
@@ -130,11 +93,6 @@
   .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
   .panel h2 { margin: 0; font-size: 21px; font-weight: 700; line-height: 1.25; }
   .panel .sub { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
-  .count {
-    display: inline-block; min-width: 26px; padding: 0 8px; margin-inline-start: 6px;
-    border-radius: 999px; background: var(--accent-soft); color: var(--accent);
-    font-size: 14px; font-weight: 700; text-align: center; vertical-align: 2px;
-  }
 
   /* Form */
   .field { margin-bottom: 22px; }
@@ -277,18 +235,6 @@
   .icon-btn.ghost:hover { background: var(--surface-2); }
   .icon-btn.view { border-color: var(--accent); color: var(--accent); }
   .icon-btn.view:hover { background: var(--accent-soft); }
-  .file-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .file-chip {
-    display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
-    padding-block: 5px; padding-inline: 5px 12px;
-    border: 1px solid var(--line); border-radius: 10px;
-    background: var(--surface-2);
-    font-size: 14px; font-weight: 600; text-align: start;
-    cursor: pointer;
-    transition: border-color .15s, background .15s;
-  }
-  .file-chip:hover { border-color: var(--accent); background: var(--accent-soft); }
-  .file-chip .file-name { font-size: 14px; }
 
   /* File viewer (inside the dialog) */
   .viewer { min-height: 100%; }
@@ -324,64 +270,7 @@
   .viewer img, .viewer video { display: block; max-width: 100%; max-height: 80vh; margin: auto; border-radius: 6px; }
   .viewer audio { width: min(100%, 520px); }
 
-  /* Tasks */
-  .tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-  .task {
-    padding: 16px 18px;
-    border: 1px solid var(--line); border-radius: var(--radius);
-    border-inline-start: 4px solid var(--status, var(--line-strong));
-    background: var(--surface);
-  }
-  .task-head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
-  .task-head h3 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; }
-  .pill {
-    font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
-    color: #fff; background: #8a9692; white-space: nowrap;
-  }
-  .pill.empty { background: transparent; color: var(--muted); border: 1px solid var(--line); }
-  dl.meta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0 0; font-size: 15px; }
-  dl.meta dt { color: var(--muted); }
-  dl.meta dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-  @media (max-width: 520px) {
-    dl.meta { grid-template-columns: 1fr; gap: 0; }
-    dl.meta dt { font-size: 13px; margin-top: 8px; }
-    dl.meta dt:first-child { margin-top: 0; }
-  }
-  .task-files { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
-  .task[hidden] { display: none; }
-
-  /* Task search + status filter; stays at the top while scrolling a long list */
-  .task-tools {
-    position: sticky; top: 0; z-index: 2;
-    display: grid; gap: 10px;
-    margin: -6px -8px 14px; padding: 6px 8px 12px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
-  }
-  .search { position: relative; }
-  .search svg.i { position: absolute; inset-inline-start: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
-  .search input { padding-inline-start: 40px; }
-  .search input::-webkit-search-cancel-button { cursor: pointer; }
-  .status-filter { display: flex; flex-wrap: wrap; gap: 6px; }
-  .fchip {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 5px 12px; border-radius: 999px;
-    border: 1px solid var(--line); background: var(--surface-2);
-    font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: border-color .15s, background .15s;
-  }
-  .fchip:hover { border-color: var(--line-strong); }
-  .fchip .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-  .fchip .n { color: var(--muted); font-weight: 500; }
-  .fchip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
-  .fchip[aria-pressed="true"] .n { color: inherit; opacity: .75; }
-  .fchip.zero:not([aria-pressed="true"]) { color: var(--muted); }
-  .task-results { font-size: 14px; color: var(--muted); }
-  .link-btn { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
-
   .hint { font-size: 14px; color: var(--muted); }
-  .empty-state { padding: 28px 16px; text-align: center; color: var(--muted); border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--surface-2); }
-  .empty-state strong { display: block; color: var(--ink); margin-bottom: 2px; }
 
   .state { padding: 56px 24px; text-align: center; }
   .state h2 { margin: 0 0 8px; }
@@ -410,30 +299,6 @@
   .dlg-head .meta { flex: 1; min-width: 0; }
   .dlg-head .file-name { font-size: 16px; }
   .dlg-body { flex: 1; overflow: auto; background: var(--surface-2); overscroll-behavior: contain; }
-  /* Document status popup, shown when the form is sent */
-  dialog.status-dialog {
-    width: min(440px, 100vw - 32px);
-    padding: 0; border: 0; border-radius: var(--radius-lg);
-    background: var(--surface); color: var(--ink);
-    box-shadow: var(--shadow-lg);
-  }
-  dialog.status-dialog::backdrop { background: rgba(8, 18, 15, .6); backdrop-filter: blur(2px); }
-  .status-dialog form { margin: 0; padding: 22px; }
-  .status-dialog h2 { margin: 0 0 4px; font-size: 20px; }
-  .status-dialog .sub { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
-  .status-dialog .checks { gap: 8px; }
-  .status-dialog .check { align-items: center; padding: 12px 14px; font-size: 16px; font-weight: 600; }
-  .status-dialog .check input { margin: 0; }
-  .status-dialog .msg:empty { display: none; }
-  .dlg-actions { display: flex; gap: 8px; margin-top: 18px; }
-  .dlg-actions button.primary { flex: 1; width: auto; font-size: 17px; padding: 12px; }
-  .dlg-actions button.secondary {
-    flex: none; padding: 12px 18px;
-    font: inherit; font-weight: 600; font-size: 16px;
-    border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
-    background: transparent; color: var(--ink); cursor: pointer;
-  }
-  .dlg-actions button.secondary:hover { background: var(--surface-2); }
 
   @media (max-width: 640px) {
     dialog.viewer-dialog { width: 100vw; height: 100dvh; border-radius: 0; }
@@ -457,22 +322,6 @@
     <button type="button" class="icon-btn ghost" id="dlgClose" aria-label="סגירה"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
   <div class="dlg-body" id="dlgBody"></div>
-</dialog>
-
-<dialog class="status-dialog" id="statusDialog" aria-labelledby="statusDlgTitle">
-  <form id="statusForm" novalidate>
-    <h2 id="statusDlgTitle">סטטוס המסמך</h2>
-    <p class="sub">יש לבחור סטטוס לפני השליחה.</p>
-    <fieldset class="field" style="margin:0">
-      <legend class="label" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">סטטוס המסמך</legend>
-      <div class="checks" id="statusChoices"></div>
-    </fieldset>
-    <div class="msg err" id="statusMsg" role="alert"></div>
-    <div class="dlg-actions">
-      <button type="submit" class="primary" id="statusConfirm">שלח</button>
-      <button type="button" class="secondary" id="statusCancel">ביטול</button>
-    </div>
-  </form>
 </dialog>
 
 <script>
@@ -504,19 +353,14 @@
   const esc = (s) => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  const dash = (s) => (s && String(s).trim()) ? esc(s) : '—';
 
   // Hebrew display text for monday labels. The monday values themselves stay as they are, since the
   // webhook and monday's status columns need the exact labels.
   const HE = {
-    'Reviewed – no update needed': 'נבדק – אין צורך בעדכון',
-    'Updated by interviewer': 'עודכן על ידי המראיין',
+    'Reviewed – no update needed': 'בדקתי. לא נדרשים שינויים',
+    'Updated by interviewer': 'תיקנתי את המסמך והעליתי אותו',
     'See Notes': 'ראה הערות',
     'Recommended': 'מומלץ',
-    'Working on it': 'בטיפול',
-    'Done': 'הושלם',
-    'Stuck': 'תקוע',
-    'canceled': 'בוטל',
   };
   const he = (s) => HE[s] || s;
 
@@ -730,121 +574,27 @@
       ${actions}
     </li>`;
 
-  const fileChip = (f) => `
-    <button type="button" class="file-chip" data-preview="${esc(f.key)}" title="צפייה ב־${esc(f.name)}">
-      ${typeBadge(f, true)}<span class="file-name" dir="auto">${esc(f.name)}</span>
-    </button>`;
-
-  function taskHtml(t) {
-    const pill = t.status
-      ? `<span class="pill" style="background:${esc(t.statusColor || '#8a9692')}">${esc(he(t.status))}</span>`
-      : `<span class="pill empty">ללא סטטוס</span>`;
-    const taskFiles = (t.files || []).map((x) => track(remoteFile(x)));
-    return `<li class="task" data-task="${esc(t.id)}" style="--status:${esc(t.statusColor || 'var(--line-strong)')}">
-      <div class="task-head"><h3 dir="auto">${esc(t.name)}</h3>${pill}</div>
-      <dl class="meta">
-        <dt>אחראי</dt><dd dir="auto">${dash(t.personInCharge)}</dd>
-        <dt>מתנדב</dt><dd dir="auto">${dash(t.linkedVolunteer)}</dd>
-        <dt>תאריך</dt><dd dir="ltr" style="text-align:end">${dash(t.date)}</dd>
-        <dt>תיאור</dt><dd dir="auto">${dash(t.description)}</dd>
-        <dt>הערות</dt><dd dir="auto">${dash(t.comments)}</dd>
-      </dl>
-      ${taskFiles.length ? `<div class="task-files file-chips">${taskFiles.map(fileChip).join('')}</div>` : ''}
-    </li>`;
-  }
-
-  // ---------- Task search + status filter ----------
-  function taskToolsHtml(tasks, statuses) {
-    const count = (label) => tasks.filter((t) => t.status === label).length;
-    const chips = statuses.map((s) => {
-      const n = count(s.label);
-      return `<button type="button" class="fchip ${n ? '' : 'zero'}" data-status="${esc(s.label)}" aria-pressed="false">
-        <span class="dot" style="background:${esc(s.color)}"></span>${esc(he(s.label))}<span class="n">${n}</span></button>`;
-    }).join('');
-    return `<div class="task-tools">
-      <div class="search">${icon('search')}<input type="search" id="taskSearch" placeholder="חיפוש משימות לפי שם, אחראי, תיאור…" aria-label="חיפוש משימות" dir="auto"></div>
-      <div class="status-filter" role="group" aria-label="סינון לפי סטטוס">
-        <button type="button" class="fchip" data-status="" aria-pressed="true">הכל<span class="n">${tasks.length}</span></button>${chips}
-      </div>
-      <div class="task-results" id="taskResults" aria-live="polite"></div>
-    </div>`;
-  }
-
-  function setupTaskFilter(tasks) {
-    const search = document.getElementById('taskSearch');
-    const results = document.getElementById('taskResults');
-    const empty = document.getElementById('taskEmpty');
-    const chips = Array.from(document.querySelectorAll('.fchip'));
-    const rows = tasks.map((t) => ({
-      el: document.querySelector(`.task[data-task="${CSS.escape(String(t.id))}"]`),
-      status: t.status,
-      text: [t.name, t.personInCharge, t.linkedVolunteer, t.description, t.comments, t.date, t.status].join(' ').toLowerCase(),
-    }));
-    let status = '';
-
-    function apply() {
-      const words = search.value.toLowerCase().split(/\s+/).filter(Boolean);
-      let shown = 0;
-      for (const r of rows) {
-        const match = (!status || r.status === status) && words.every((w) => r.text.includes(w));
-        r.el.hidden = !match;
-        if (match) shown++;
-      }
-      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.status === status)));
-      empty.hidden = shown > 0;
-      empty.parentElement.scrollTop = 0; // show the first match, not wherever the list was scrolled to
-      results.textContent = shown === rows.length ? '' : `מוצגות ${shown} מתוך ${rows.length} משימות`;
-      results.hidden = !results.textContent;
-    }
-
-    chips.forEach((c) => c.addEventListener('click', () => {
-      status = c.dataset.status === status ? '' : c.dataset.status; // clicking the active chip goes back to All
-      apply();
-    }));
-    search.addEventListener('input', apply);
-    document.getElementById('taskReset').addEventListener('click', () => {
-      search.value = '';
-      status = '';
-      apply();
-      search.focus();
-    });
-    apply();
-  }
-
   const existingRow = (f) => fileRow(f, [f.ext.toUpperCase(), formatSize(f.size)].filter(Boolean).join(' · '), `
     <button type="button" class="icon-btn view" data-preview="${esc(f.key)}">${icon('eye')}<span class="lbl">צפייה</span></button>
     <a class="icon-btn ghost" href="${esc(f.downloadUrl)}" download aria-label="הורדת ${esc(f.name)}">${icon('download')}</a>`);
 
   function render(data) {
-    const f = data.fields, m = data.meta, titles = m.titles;
+    const f = data.fields, m = data.meta;
     document.title = 'בדיקת ראיון: ' + data.item.name;
     const summaryFiles = (f.meetingSummaryFiles || []).map((x) => track(remoteFile(x)));
-    const chip = (label, value) => `<span class="chip">${esc(label)}: <b dir="auto">${value ? esc(he(value)) : 'לא נקבע'}</b></span>`;
     const rejected = !!f.rejected; // an answer saved earlier means the volunteer was marked as rejected
-    const n = data.tasks.length;
+    const interviewer = (f.interviewerName || '').trim();
 
     app.innerHTML = `
-      <header class="page">
-        <p class="eyebrow">בדיקת ראיון · פריט ${esc(data.item.id)}</p>
-        <h1 dir="auto">${esc(data.item.name)}</h1>
-        <p class="interviewer ${f.interviewerName ? '' : 'missing'}">${icon('user')}מראיין:
-          <b dir="auto">${f.interviewerName ? esc(f.interviewerName) : 'לא שובץ'}</b></p>
-        <div class="chips">
-          ${chip('סטטוס המסמך', f.status)}
-          ${chip('גרעין', f.garin)}
-          <span class="chip">${n === 1 ? 'משימה מקושרת אחת' : `<b>${n}</b> משימות מקושרות`}</span>
-        </div>
-      </header>
-      <div class="grid">
         <section class="panel form-panel" id="formPanel">
-          <div class="panel-head"><div>
-            <h2>הבדיקה שלך</h2>
-            <p class="sub" dir="auto">יש להוריד את הראיון, לשנות במידת הצורך ולהעלות את המסמך המתוקן</p>
-          </div></div>
+          <div class="intro">
+            <h1 dir="auto">שלום${interviewer ? ` <bdi>${esc(interviewer)}</bdi>` : ''}</h1>
+            <p dir="auto">בהמשך לראיון שערכת ל<bdi>${esc(data.item.name)}</bdi>, אנו רוצים לקבל ממך השלמות למסמך סיכום הריאיון.</p>
+            <p dir="auto">יש להוריד את המסמך, לשנות במידת הצורך ולהעלות את המסמך המתוקן. אם אין תיקונים אין צורך בהעלאה חוזרת של המסמך.</p>
+          </div>
           <form id="reviewForm" novalidate>
             <div class="form-scroll">
             <div class="field">
-              <span class="label" dir="auto">${esc(titles.meetingSummary)}${summaryFiles.length ? `<span class="count">${summaryFiles.length}</span>` : ''}</span>
               ${summaryFiles.length
                 ? `<ul class="file-list existing">${summaryFiles.map(existingRow).join('')}</ul>`
                 : '<p class="hint" style="margin:0 0 10px">עדיין לא צורף קובץ.</p>'}
@@ -877,33 +627,19 @@
               <textarea id="rejectionDetails" dir="auto">${esc(f.rejectionDetails || '')}</textarea>
               <p class="hint">התשובה תתווסף להערות המראיין בעת השליחה.</p>
             </div>
+            <div class="field">
+              <label for="docStatus" dir="auto">פרט/י בבקשה את הבעיות והחששות בקשר להשתלבות המועמד(ים) בגרעין</label>
+              ${selectHtml('docStatus', m.statusOptions || [], f.status)}
+            </div>
             </div>
             <div class="form-actions">
               <button type="submit" class="primary" id="saveBtn">שלח לעידכון</button>
               <div class="msg" id="msg" role="status" aria-live="polite"></div>
             </div>
           </form>
-        </section>
+        </section>`;
 
-        <section class="panel tasks-panel">
-          <div class="panel-head"><div>
-            <h2>משימות${n ? `<span class="count">${n}</span>` : ''}</h2>
-            <p class="sub">משימות מקושרות מטבלת המשימות. לעיון בלבד, לא ניתן לערוך אותן כאן.</p>
-          </div></div>
-          ${data.tasks.length ? `
-            ${taskToolsHtml(data.tasks, m.taskStatuses || [])}
-            <div class="task-scroll">
-              <ul class="tasks" id="taskList">${data.tasks.map(taskHtml).join('')}</ul>
-              <div class="empty-state" id="taskEmpty" hidden><strong>אין משימות תואמות</strong>
-                <button type="button" class="link-btn" id="taskReset">ניקוי החיפוש והסינון</button></div>
-            </div>`
-          : '<div class="task-scroll"><div class="empty-state"><strong>אין עדיין משימות</strong>אין משימות שמקושרות למתנדב הזה.</div></div>'}
-        </section>
-      </div>`;
-
-    statusOptions = m.statusOptions || [];
     setupUploads();
-    if (data.tasks.length) setupTaskFilter(data.tasks);
 
     document.querySelectorAll('input[name="rejected"]').forEach((r) => r.addEventListener('change', () => {
       document.getElementById('detailsField').hidden = rejectedValue() !== 'Yes';
@@ -970,36 +706,6 @@
 
   const rejectedValue = () => (document.querySelector('input[name="rejected"]:checked') || {}).value || 'No';
 
-  // ---------- Document status popup (required before sending) ----------
-  let statusOptions = [];
-  const statusDlg = document.getElementById('statusDialog');
-  const statusMsg = document.getElementById('statusMsg');
-  let statusResolve = null;
-  function askStatus() {
-    document.getElementById('statusChoices').innerHTML = statusOptions.map((o) => `
-      <label class="check"><input type="radio" name="docStatus" value="${esc(o)}"><span dir="auto">${esc(he(o))}</span></label>`).join('');
-    statusMsg.textContent = '';
-    return new Promise((resolve) => {
-      statusResolve = resolve;
-      if (typeof statusDlg.showModal === 'function') statusDlg.showModal(); else statusDlg.setAttribute('open', '');
-    });
-  }
-  function finishStatus(value) {
-    const done = statusResolve;
-    statusResolve = null;
-    if (statusDlg.open) statusDlg.close();
-    if (done) done(value);
-  }
-  document.getElementById('statusForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const picked = statusDlg.querySelector('input[name="docStatus"]:checked');
-    if (!picked) { statusMsg.textContent = 'יש לבחור סטטוס מסמך.'; return; }
-    finishStatus(picked.value);
-  });
-  document.getElementById('statusChoices').addEventListener('change', () => { statusMsg.textContent = ''; });
-  document.getElementById('statusCancel').addEventListener('click', () => finishStatus(null));
-  statusDlg.addEventListener('close', () => finishStatus(null)); // Esc key
-
   async function submit(id) {
     const btn = document.getElementById('saveBtn');
     const msg = document.getElementById('msg');
@@ -1020,8 +726,13 @@
       return;
     }
 
-    const status = await askStatus();
-    if (!status) return; // popup cancelled: nothing is sent
+    const status = document.getElementById('docStatus').value;
+    if (!status) {
+      msg.className = 'msg err';
+      msg.textContent = 'יש לבחור סטטוס מסמך.';
+      document.getElementById('docStatus').focus();
+      return;
+    }
 
     btn.disabled = true; btn.textContent = 'שולח…';
     try {
