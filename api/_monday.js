@@ -9,7 +9,8 @@ const CONFIG = {
     status: {
       id: 'color_mm8rrwba',
       title: 'Status',
-      options: ['Reviewed – no update needed', 'Updated by interviewer'],
+      // Must match the labels of the Status column in monday exactly.
+      options: ['בדקתי. לא נדרשים שינויים', 'תיקנתי את המסמך והעליתי אותו'],
     },
     recommendation: {
       id: 'color_mm8r7s7g',
